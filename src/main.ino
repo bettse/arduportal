@@ -12,16 +12,21 @@
  */
 
 #include "Arduboy.h"
+#include "RawHID.h"
 
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
+uint8_t rawhidData[255];
 
 
 // This function runs once in your game.
 // use it for anything that needs to be set only once in your game.
 void setup() {
+  Serial.begin(115200);
+  RawHID.begin(rawhidData, sizeof(rawhidData));
+
   // initiate arduboy instance
-  arduboy.begin();
+  arduboy.beginNoLogo();
 
   // here we set the framerate to 15, we do not need to run at
   // default 60 and it saves us battery life
@@ -43,8 +48,26 @@ void loop() {
   // (positions start at 0, 0) 
   arduboy.setCursor(4, 9);
 
-  // then we print to screen what is in the Quotation marks ""
-  arduboy.print(F("Hello, world!"));
+  if (arduboy.pressed(A_BUTTON)) {
+    arduboy.print(F("A"));
+  } else if (arduboy.pressed(B_BUTTON)) {
+    arduboy.print(F("B"));
+  } else if (arduboy.pressed(UP_BUTTON)) {
+    arduboy.print(F("U"));
+  } else if (arduboy.pressed(RIGHT_BUTTON)) {
+    arduboy.print(F("R"));
+  } else if (arduboy.pressed(DOWN_BUTTON)) {
+    arduboy.print(F("D"));
+  } else if (arduboy.pressed(LEFT_BUTTON)) {
+    arduboy.print(F("L"));
+  } else {
+    auto bytesAvailable = RawHID.available();
+    if (bytesAvailable)
+    while (bytesAvailable--) {
+      //Serial.println(RawHID.read());
+      arduboy.println(RawHID.read());
+    }
+  }
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
