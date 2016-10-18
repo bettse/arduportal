@@ -53,6 +53,7 @@ RawHID_::RawHID_(void) : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_P
 }
 
 int RawHID_::getInterface(uint8_t *interfaceCount) {
+  arduboy->println(F("getInterface"));
   // Maybe as optional device FastRawHID with different USAGE PAGE
   *interfaceCount += 1; // uses 1
   HIDDescriptor hidInterface = {
@@ -63,6 +64,7 @@ int RawHID_::getInterface(uint8_t *interfaceCount) {
 }
 
 int RawHID_::getDescriptor(USBSetup &setup) {
+  arduboy->println(F("getDescriptor"));
   // Check if this is a HID Class Descriptor request
   if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) {
     return 0;
@@ -84,6 +86,7 @@ int RawHID_::getDescriptor(USBSetup &setup) {
 }
 
 bool RawHID_::setup(USBSetup &setup) {
+  arduboy->println(F("setup"));
   if (pluggedInterface != setup.wIndex) {
     return false;
   }

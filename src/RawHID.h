@@ -28,6 +28,7 @@ THE SOFTWARE.
 #include "PluggableUSB.h"
 #include "HID.h"
 #include "HID-Settings.h"
+#include "Arduboy.h"
 
 // RawHID might never work with multireports, because of OS problems
 // therefore we have to make it a single report with no idea. No other HID device will be supported then.
@@ -97,6 +98,11 @@ public:
     featureLength |= 0x8000;
   }
 
+  void begin(void *report, int length, Arduboy *ab) {
+    arduboy = ab;
+    begin(report, length);
+  }
+
   void begin(void *report, int length) {
     if (length > 0) {
       data = (uint8_t *)report;
@@ -161,6 +167,7 @@ protected:
   int getInterface(uint8_t *interfaceCount);
   int getDescriptor(USBSetup &setup);
   bool setup(USBSetup &setup);
+  Arduboy *arduboy;
 
   uint8_t epType[1];
   uint8_t protocol;

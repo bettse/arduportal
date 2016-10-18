@@ -23,7 +23,7 @@ uint8_t rawhidData[255];
 // use it for anything that needs to be set only once in your game.
 void setup() {
   Serial.begin(115200);
-  RawHID.begin(rawhidData, sizeof(rawhidData));
+  RawHID.begin(rawhidData, sizeof(rawhidData), &arduboy);
 
   // initiate arduboy instance
   arduboy.beginNoLogo();
@@ -41,18 +41,14 @@ void loop() {
   if (!(arduboy.nextFrame()))
     return;
 
-  // first we clear our screen to black
-  arduboy.clear();
-
-  // we set our cursor 5 pixels to the right and 10 down from the top
-  // (positions start at 0, 0) 
-  arduboy.setCursor(4, 9);
 
   if (arduboy.pressed(A_BUTTON)) {
-    arduboy.print(F("A"));
+    //arduboy.print(F("A"));
+    arduboy.clear();
   } else if (arduboy.pressed(B_BUTTON)) {
     arduboy.print(F("B"));
   } else if (arduboy.pressed(UP_BUTTON)) {
+    arduboy.setCursor(0, 0);
     arduboy.print(F("U"));
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
     arduboy.print(F("R"));
@@ -60,12 +56,13 @@ void loop() {
     arduboy.print(F("D"));
   } else if (arduboy.pressed(LEFT_BUTTON)) {
     arduboy.print(F("L"));
-  } else {
-    auto bytesAvailable = RawHID.available();
-    if (bytesAvailable)
+  }
+
+  auto bytesAvailable = RawHID.available();
+  if (bytesAvailable) {
     while (bytesAvailable--) {
       //Serial.println(RawHID.read());
-      arduboy.println(RawHID.read());
+      arduboy.print(RawHID.read());
     }
   }
 
