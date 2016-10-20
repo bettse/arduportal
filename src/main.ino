@@ -13,10 +13,15 @@
 
 #include "Arduboy.h"
 #include "RawHID.h"
+#include "VirtualPortal.h"
+
+#define HID_MAX_LENGTH 64
 
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 uint8_t rawhidData[255];
+
+VirtualPortal vp = VirtualPortal();
 
 
 // This function runs once in your game.
@@ -31,6 +36,7 @@ void setup() {
   // here we set the framerate to 15, we do not need to run at
   // default 60 and it saves us battery life
   arduboy.setFrameRate(15);
+  vp.connect();
 }
 
 
@@ -45,10 +51,10 @@ void loop() {
   if (arduboy.pressed(A_BUTTON)) {
     //arduboy.print(F("A"));
     arduboy.clear();
+    arduboy.setCursor(0, 0);
   } else if (arduboy.pressed(B_BUTTON)) {
     arduboy.print(F("B"));
   } else if (arduboy.pressed(UP_BUTTON)) {
-    arduboy.setCursor(0, 0);
     arduboy.print(F("U"));
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
     arduboy.print(F("R"));
@@ -59,16 +65,26 @@ void loop() {
   }
 
   auto bytesAvailable = RawHID.available();
-  uint8_t incoming[64] = {0};
+  uint8_t incoming[HID_MAX_LENGTH] = {0};
   if (bytesAvailable) {
-    arduboy.print(bytesAvailable);
-    arduboy.print(" ");
+    arduboy.print("=>");
 
     for (int i = 0; i < bytesAvailable; i++) {
       incoming[i] = RawHID.read();
       arduboy.print(incoming[i], HEX);
     }
     arduboy.println("");
+
+    uint8_t response[HID_MAX_LENGTH] = {0};
+    uint8_t len = vp.respondTo(incoming, response);
+    if(len) {
+      arduboy.print("<=");
+      for (int i = 0; i < len; i++) {
+        arduboy.print(response[i], HEX);
+      }
+      arduboy.println("");
+      RawHID.write(response, len);
+    }
   }
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
