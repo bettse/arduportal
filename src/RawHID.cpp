@@ -24,27 +24,7 @@ THE SOFTWARE.
 #include "RawHID.h"
 
 static const uint8_t _hidReportDescriptorRawHID[] PROGMEM = {
-    /*    RAW HID */
-    0x06, lowByte(RAWHID_USAGE_PAGE), highByte(RAWHID_USAGE_PAGE), /* 30 */
-    0x0A, lowByte(RAWHID_USAGE), highByte(RAWHID_USAGE),
-
-    0xA1, 0x01, /* Collection 0x01 */
-    // RawHID is not multireport compatible.
-    // On Linux it might work with some modifications,
-    // however you are not happy to use it like that.
-    //0x85, HID_REPORTID_RAWHID,			 /* REPORT_ID */
-    0x75, 0x08, /* report size = 8 bits */
-    0x15, 0x00, /* logical minimum = 0 */
-    0x26, 0xFF, 0x00, /* logical maximum = 255 */
-
-    0x95, RAWHID_TX_SIZE, /* report count TX */
-    0x09, 0x01, /* usage */
-    0x81, 0x02, /* Input (array) */
-
-    0x95, RAWHID_RX_SIZE, /* report count RX */
-    0x09, 0x02, /* usage */
-    0x91, 0x02, /* Output (array) */
-    0xC0 /* end collection */
+  0x06, 0x00, 0xFF, 0x09, 0x01, 0xA1, 0x01, 0x19, 0x01, 0x29, 0x40, 0x15, 0x00, 0x26, 0xFF, 0x00, 0x75, 0x08, 0x95, 0x20, 0x81, 0x00, 0x19, 0x01, 0x29, 0x40, 0x91, 0x00, 0xC0
 };
 
 RawHID_::RawHID_(void) : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1), dataLength(0), dataAvailable(0), featureReport(NULL), featureLength(0) {
@@ -53,7 +33,6 @@ RawHID_::RawHID_(void) : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_P
 }
 
 int RawHID_::getInterface(uint8_t *interfaceCount) {
-  //arduboy->println(F("getInterface"));
   // Maybe as optional device FastRawHID with different USAGE PAGE
   *interfaceCount += 1; // uses 1
   HIDDescriptor hidInterface = {
@@ -64,7 +43,6 @@ int RawHID_::getInterface(uint8_t *interfaceCount) {
 }
 
 int RawHID_::getDescriptor(USBSetup &setup) {
-  //arduboy->println(F("getDescriptor"));
   // Check if this is a HID Class Descriptor request
   if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) {
     return 0;
@@ -86,7 +64,6 @@ int RawHID_::getDescriptor(USBSetup &setup) {
 }
 
 bool RawHID_::setup(USBSetup &setup) {
-  arduboy->println(F("setup"));
   if (pluggedInterface != setup.wIndex) {
     return false;
   }

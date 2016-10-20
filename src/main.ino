@@ -30,7 +30,7 @@ long interval = 1000;
 // use it for anything that needs to be set only once in your game.
 void setup() {
   Serial.begin(115200);
-  RawHID.begin(rawhidData, sizeof(rawhidData), &arduboy);
+  RawHID.begin(rawhidData, sizeof(rawhidData));
 
   // initiate arduboy instance
   arduboy.beginNoLogo();
