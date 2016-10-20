@@ -59,11 +59,16 @@ void loop() {
   }
 
   auto bytesAvailable = RawHID.available();
+  uint8_t incoming[64] = {0};
   if (bytesAvailable) {
-    while (bytesAvailable--) {
-      //Serial.println(RawHID.read());
-      arduboy.print(RawHID.read());
+    arduboy.print(bytesAvailable);
+    arduboy.print(" ");
+
+    for (int i = 0; i < bytesAvailable; i++) {
+      incoming[i] = RawHID.read();
+      arduboy.print(incoming[i], HEX);
     }
+    arduboy.println("");
   }
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
