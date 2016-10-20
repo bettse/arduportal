@@ -21,6 +21,7 @@ class VirtualPortal {
     void subscribe();
     void unsubscribe();
     bool removeType(uint8_t);
+    int status(uint8_t* response);
 
   private:
     int sequence;
@@ -33,7 +34,6 @@ class VirtualPortal {
     int light(uint8_t* message);
     int query(uint8_t* message, uint8_t* response);
     int reset(uint8_t* response);
-    int status(uint8_t* response);
     int write(uint8_t* message, uint8_t* response);
 
     void printCommand(bool incoming, const uint8_t* command);

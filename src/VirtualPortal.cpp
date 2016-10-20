@@ -106,6 +106,7 @@ int VirtualPortal::reset(uint8_t* response) {
   response[9] = 0x02;
   response[10] = 0x19;
 
+  return 11;
 }
 
 int VirtualPortal::activate(uint8_t* message, uint8_t* response) {
@@ -122,7 +123,7 @@ int VirtualPortal::activate(uint8_t* message, uint8_t* response) {
   response[10] = 0xfc;
   response[11] = 0x7d;
   response[12] = 0xf4;
-
+  return 13;
 }
 
 int VirtualPortal::status(uint8_t* response) {

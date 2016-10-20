@@ -22,6 +22,8 @@ Arduboy arduboy;
 uint8_t rawhidData[255];
 
 VirtualPortal vp = VirtualPortal();
+long previousMillis = 0;
+long interval = 1000;
 
 
 // This function runs once in your game.
@@ -43,26 +45,10 @@ void setup() {
 // our main game loop, this runs once every cycle/frame.
 // this is where our game logic goes.
 void loop() {
+  unsigned long currentMillis = millis();
   // pause render until it's time for the next frame
   if (!(arduboy.nextFrame()))
     return;
-
-
-  if (arduboy.pressed(A_BUTTON)) {
-    //arduboy.print(F("A"));
-    arduboy.clear();
-    arduboy.setCursor(0, 0);
-  } else if (arduboy.pressed(B_BUTTON)) {
-    arduboy.print(F("B"));
-  } else if (arduboy.pressed(UP_BUTTON)) {
-    arduboy.print(F("U"));
-  } else if (arduboy.pressed(RIGHT_BUTTON)) {
-    arduboy.print(F("R"));
-  } else if (arduboy.pressed(DOWN_BUTTON)) {
-    arduboy.print(F("D"));
-  } else if (arduboy.pressed(LEFT_BUTTON)) {
-    arduboy.print(F("L"));
-  }
 
   auto bytesAvailable = RawHID.available();
   uint8_t incoming[HID_MAX_LENGTH] = {0};
@@ -87,6 +73,37 @@ void loop() {
     }
   }
 
+  if (arduboy.pressed(A_BUTTON)) {
+    //arduboy.print(F("A"));
+    arduboy.clear();
+    arduboy.setCursor(0, 0);
+  } else if (arduboy.pressed(B_BUTTON)) {
+    arduboy.print(F("B"));
+  } else if (arduboy.pressed(UP_BUTTON)) {
+    arduboy.print(F("U"));
+  } else if (arduboy.pressed(RIGHT_BUTTON)) {
+    arduboy.print(F("R"));
+  } else if (arduboy.pressed(DOWN_BUTTON)) {
+    arduboy.print(F("D"));
+  } else if (arduboy.pressed(LEFT_BUTTON)) {
+    arduboy.print(F("L"));
+  }
+
   // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
+
+  if(currentMillis - previousMillis > interval) {
+    previousMillis = currentMillis;
+    uint8_t response[HID_MAX_LENGTH] = {0};
+    uint8_t len = vp.status(response);
+    if(len) {
+      arduboy.print("<=");
+      for (int i = 0; i < len; i++) {
+        arduboy.print(response[i], HEX);
+      }
+      arduboy.println("");
+      RawHID.write(response, len);
+    }
+  }
+
 }
