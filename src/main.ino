@@ -66,7 +66,7 @@ void loop() {
         arduboy.print(response[i], HEX);
       }
       arduboy.println(".");
-      RawHID.write(response, len);
+      RawHID.write(response, HID_MAX_LENGTH);
     }
   }
 
@@ -83,7 +83,7 @@ void loop() {
         arduboy.print(response[i], HEX);
       }
       arduboy.println(".");
-      RawHID.write(response, len);
+      RawHID.write(response, HID_MAX_LENGTH);
     }
 
   } else if (arduboy.pressed(B_BUTTON)) {
