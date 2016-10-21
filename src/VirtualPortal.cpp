@@ -1,7 +1,6 @@
 #include "VirtualPortal.h"
 
-VirtualPortal::VirtualPortal() : lightVal(0), sequence(0) {
-    characterToken = NULL;
+VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL) {
 }
 
 int VirtualPortal::respondTo(uint8_t* message, uint8_t* response) {
@@ -38,59 +37,32 @@ int VirtualPortal::respondTo(uint8_t* message, uint8_t* response) {
 }
 
 int VirtualPortal::query(uint8_t* message, uint8_t* response) {
-    int index = message[1];
-    int block = message[2];
-    int arrayIndex = index & 0x0f;
+  int index = message[1];
+  int block = message[2];
+  int arrayIndex = index & 0x0f;
 
-    response[0] = 'Q';
-    response[1] = index;
-    response[2] = block;
+  response[0] = 'Q';
+  response[1] = index;
+  response[2] = block;
 
-    switch(arrayIndex) {
-      case 0:
-        characterToken->read(block, response+3);
-        break;
-      case 4:
-        trapToken->read(block, response+3);
-        break;
-      case 8:
-        locationToken->read(block, response+3);
-        break;
-      case 12:
-        itemToken->read(block, response+3);
-        break;
-    }
-
-    return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
+  characterToken->read(block, response+3);
+  return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
 }
 
 int VirtualPortal::write(uint8_t* message, uint8_t* response) {
-    int index = message[1];
-    int block = message[2];
-    int arrayIndex = index & 0x0f;
+  int index = message[1];
+  int block = message[2];
+  int arrayIndex = index & 0x0f;
 
-    switch(arrayIndex) {
-      case 0:
-        characterToken->write(block, message+3);
-        break;
-      case 4:
-        trapToken->write(block, message+3);
-        break;
-      case 8:
-        locationToken->write(block, message+3);
-        break;
-      case 12:
-        itemToken->write(block, message+3);
-        break;
-    }
+  characterToken->write(block, message+3);
 
-    //Status update with different first 3 bytes
-    status(response);
-    response[0] = 'W';
-    response[1] = index;
-    response[2] = block;
+  //Status update with different first 3 bytes
+  status(response);
+  response[0] = 'W';
+  response[1] = index;
+  response[2] = block;
 
-    return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
+  return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
 }
 
 int VirtualPortal::reset(uint8_t* response) {
@@ -129,76 +101,23 @@ int VirtualPortal::activate(uint8_t* message, uint8_t* response) {
 int VirtualPortal::status(uint8_t* response) {
   response[0] = 'S';
   response[1] = characterToken ? 0x01 : 0x00;
-  response[2] = trapToken ? 0x01 : 0x00;
-  response[3] = locationToken ? 0x01 : 0x00;
-  response[4] = itemToken ? 0x01 : 0x00;
-
+  response[2] = 0;
+  response[3] = 0;
+  response[4] = 0;
   response[5] = sequence++ % 0xFF;
-
-  response[6] = 1;
-  response[7] = 0xaa;
-  response[8] = 0xc2;
-  response[9] = 0x02;
-  response[10] = 0x19;
 
   return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
 }
 
 bool VirtualPortal::loadToken(Token *t) {
-  Serial.print("Load ");
-  switch(t->type()) {
-    case TRAP:
-      trapToken = t;
-      break;
-    case MAGIC_ITEM:
-      itemToken = t;
-      break;
-    case LOCATION:
-      locationToken = t;
-      break;
-    case TRAP_MASTER:
-    case MINI:
-    case REGULAR:
-      characterToken = t;
-      break;
-  }
-  Serial.println(t->getName());
+  characterToken = t;
   return true;
 }
 
 bool VirtualPortal::removeType(uint8_t type) {
-  //Serial.print("Removing token type "); Serial.println(type, HEX);
-  switch(type) {
-    case TRAP:
-      if (trapToken) {
-        Serial.println("Unload trap");
-        delete trapToken;
-        trapToken = NULL;
-      }
-      break;
-    case MAGIC_ITEM:
-      if (itemToken) {
-        Serial.println("Unload item");
-        delete itemToken;
-        itemToken = NULL;
-      }
-      break;
-    case LOCATION:
-      if (locationToken) {
-        Serial.println("Unload location");
-        delete locationToken;
-        locationToken = NULL;
-      }
-      break;
-    case TRAP_MASTER:
-    case MINI:
-    case REGULAR:
-      if (characterToken) {
-        Serial.println("Unload character");
-        delete characterToken;
-        characterToken = NULL;
-      }
-      break;
+  if (characterToken) {
+    delete characterToken;
+    characterToken = NULL;
   }
   return true;
 }

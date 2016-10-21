@@ -26,7 +26,7 @@ class VirtualPortal {
   private:
     int sequence;
     uint8_t lightVal;
-    Token *characterToken, *trapToken, *locationToken, *itemToken;
+    Token *characterToken;
 
     int activate(uint8_t* message, uint8_t* response);
     int color(uint8_t* message);
