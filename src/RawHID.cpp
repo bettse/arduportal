@@ -138,4 +138,9 @@ bool RawHID_::setup(USBSetup &setup) {
   return false;
 }
 
+uint8_t RawHID_::getShortName(char *iSerialNum) {
+  *iSerialNum = 0;
+  return 0;
+}
+
 RawHID_ RawHID;
