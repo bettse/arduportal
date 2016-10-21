@@ -32,41 +32,18 @@ THE SOFTWARE.
 // RawHID might never work with multireports, because of OS problems
 // therefore we have to make it a single report with no idea. No other HID device will be supported then.
 #undef RAWHID_USAGE_PAGE
-#define RAWHID_USAGE_PAGE 0xFFC0 // recommended: 0xFF00 to 0xFFFF
+#define RAWHID_USAGE_PAGE 0xFF00 // recommended: 0xFF00 to 0xFFFF
 
 #undef RAWHID_USAGE
-#define RAWHID_USAGE 0x0C00 // recommended: 0x0100 to 0xFFFF
+#define RAWHID_USAGE 0x0100 // recommended: 0x0100 to 0xFFFF
 
-// Keep one byte offset for the reportID if used
-#if (HID_REPORTID_RAWHID)
-#define RAWHID_SIZE (USB_EP_SIZE - 1)
-#error RAWHID does not work properly with a report ID and multiple reports.
-#error Please remove this manually if you know what you are doing.
-#else
-#define RAWHID_SIZE (USB_EP_SIZE)
-#endif
+#define RAWHID_SIZE 32
 
 #undef RAWHID_TX_SIZE
 #define RAWHID_TX_SIZE RAWHID_SIZE
 
 #undef RAWHID_RX_SIZE
 #define RAWHID_RX_SIZE RAWHID_SIZE
-
-typedef union {
-  // a RAWHID_TX_SIZE byte buffer for tx
-  uint8_t whole8[];
-  uint16_t whole16[];
-  uint32_t whole32[];
-  uint8_t buff[RAWHID_TX_SIZE];
-} HID_RawKeyboardTXReport_Data_t;
-
-typedef union {
-  // a RAWHID_TX_SIZE byte buffer for rx
-  uint8_t whole8[];
-  uint16_t whole16[];
-  uint32_t whole32[];
-  uint8_t buff[RAWHID_RX_SIZE];
-} HID_RawKeyboardRXReport_Data_t;
 
 class RawHID_ : public PluggableUSBModule, public Stream {
 public:
@@ -162,7 +139,7 @@ protected:
   int getDescriptor(USBSetup &setup);
   bool setup(USBSetup &setup);
 
-  uint8_t epType[1];
+  uint8_t epType[2];
   uint8_t protocol;
   uint8_t idle;
 
@@ -173,5 +150,7 @@ protected:
 
   uint8_t *featureReport;
   int featureLength;
+
+  uint8_t _keyReport[32];
 };
 extern RawHID_ RawHID;
