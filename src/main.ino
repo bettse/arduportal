@@ -20,6 +20,7 @@
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 uint8_t rawhidData[HID_MAX_LENGTH];
+uint8_t featureReport[HID_MAX_LENGTH] = {0};
 
 VirtualPortal vp = VirtualPortal();
 long previousMillis = 0;
@@ -32,12 +33,14 @@ unsigned int token_count = 1;
 void setup() {
   Serial.begin(115200);
   RawHID.begin(rawhidData, sizeof(rawhidData));
+  RawHID.setFeatureReport(featureReport, sizeof(featureReport));
 
   // initiate arduboy instance
   arduboy.beginNoLogo();
 
   arduboy.setFrameRate(15);
   vp.connect();
+  arduboy.println("Setup complete");
 }
 
 
@@ -103,6 +106,16 @@ void loop() {
     arduboy.print(F("L"));
   }
   libraryId = positive_modulo(libraryId, token_count);
+
+  int frLen = RawHID.availableFeatureReport();
+  if (frLen) {
+    arduboy.print("FR:");
+    for (int i = 0; i < frLen; i++) {
+      arduboy.print(featureReport[i], HEX);
+    }
+    arduboy.println(".");
+    RawHID.enableFeatureReport();
+  }
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
