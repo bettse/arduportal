@@ -19,19 +19,19 @@
 
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
-uint8_t rawhidData[255];
-
-uint8_t featureReport[HID_MAX_LENGTH] = {0};
+uint8_t rawhidData[HID_MAX_LENGTH];
 
 VirtualPortal vp = VirtualPortal();
 long previousMillis = 0;
 long interval = 1000;
 
+int libraryId = 0; //Token being displayed
+Token *next = NULL;
+unsigned int token_count = 1;
 
 void setup() {
   Serial.begin(115200);
   RawHID.begin(rawhidData, sizeof(rawhidData));
-  RawHID.setFeatureReport(featureReport, sizeof(featureReport));
 
   // initiate arduboy instance
   arduboy.beginNoLogo();
@@ -43,9 +43,15 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
-  // pause render until it's time for the next frame
-  //if (!(arduboy.nextFrame()))
-  //  return;
+
+  if(currentMillis - previousMillis > interval) {
+    previousMillis = currentMillis;
+
+    if (next) {
+      vp.loadToken(next);
+      next = NULL;
+    }
+  }
 
   auto bytesAvailable = RawHID.available();
   uint8_t incoming[HID_MAX_LENGTH] = {0};
@@ -86,30 +92,23 @@ void loop() {
       RawHID.write(response, HID_MAX_LENGTH);
     }
   } else if (arduboy.pressed(UP_BUTTON)) {
-    arduboy.print(F("U"));
+    libraryId++;
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
-    arduboy.print(F("R"));
+    next = new Token(libraryId);
+    arduboy.clear();
+    arduboy.setCursor(0, 0);
   } else if (arduboy.pressed(DOWN_BUTTON)) {
-    arduboy.print(F("D"));
+    libraryId--;
   } else if (arduboy.pressed(LEFT_BUTTON)) {
     arduboy.print(F("L"));
   }
+  libraryId = positive_modulo(libraryId, token_count);
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
-
-  if(currentMillis - previousMillis > interval) {
-    previousMillis = currentMillis;
-  }
-
-  int frLen = RawHID.availableFeatureReport();
-  if (frLen) {
-    arduboy.print("FR:");
-    for (int i = 0; i < frLen; i++) {
-      arduboy.print(featureReport[i], HEX);
-    }
-    arduboy.println(".");
-    RawHID.enableFeatureReport();
-  }
-
 }
+
+inline int positive_modulo(int i, int n) {
+  return (i % n + n) % n;
+}
+
