@@ -71,10 +71,10 @@ void loop() {
   }
 
   if (arduboy.pressed(A_BUTTON)) {
-    //arduboy.print(F("A"));
     arduboy.clear();
     arduboy.setCursor(0, 0);
 
+  } else if (arduboy.pressed(B_BUTTON)) {
     uint8_t response[HID_MAX_LENGTH] = {0};
     uint8_t len = vp.status(response);
     if(len) {
@@ -85,9 +85,6 @@ void loop() {
       arduboy.println(".");
       RawHID.write(response, HID_MAX_LENGTH);
     }
-
-  } else if (arduboy.pressed(B_BUTTON)) {
-    //arduboy.print(F("B"));
   } else if (arduboy.pressed(UP_BUTTON)) {
     arduboy.print(F("U"));
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
