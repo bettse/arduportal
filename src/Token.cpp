@@ -25,9 +25,6 @@ void Token::readFlash(int block, uint8_t* buffer) {
   int chapter = TOC_SIZE + (libraryId * CHAPTER_SIZE);
   int page_offset = block / BLOCKS_PER_PAGE; //Which page in chapter [0,3]
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
-  Serial.print(F("readFlash ")); Serial.print(chapter); Serial.print(","); Serial.print(page_offset); Serial.print(","); Serial.println(block_offset);
-
-  //dflash.Page_Read_Str(chapter + page_offset, block_offset, BLOCK_SIZE, buffer);
 }
 
 void Token::writeFlash(int block, uint8_t* buffer) {
@@ -49,25 +46,15 @@ void Token::writeFlash(int block, uint8_t* buffer) {
       return;
   }
 
-  /*
-  dflash.Page_To_Buffer(chapter + page_offset, dflash_buffer);
-  dflash.Buffer_Write_Str(dflash_buffer, block_offset, BLOCK_SIZE, buffer);
-  dflash.Buffer_To_Page(dflash_buffer, chapter + page_offset);
-  */
 }
 
 void Token::display() {
   int page_offset = libraryId / BLOCKS_PER_PAGE;
   int block_offset = (libraryId % BLOCKS_PER_PAGE) * BLOCK_SIZE;
-  //Serial.print("TOC ");  Serial.print(page_offset); Serial.print(","); Serial.println(block_offset);
   uint8_t name_len = BLOCK_SIZE - 1;
-  //dflash.Page_Read_Str(page_offset, block_offset, name_len, (uint8_t*)name);
-  //dflash.Page_Read_Str(page_offset, block_offset + name_len, 1, &elementAndType);
 
   //Topline Character name
   LCD.print(name);
-  Serial.write(name, min(strlen(name), BLOCK_SIZE - 1));
-  Serial.println(" ");
 
   switch(element()) {
     case NONE:
@@ -150,8 +137,6 @@ char* Token::getName() {
   int page_offset = libraryId / BLOCKS_PER_PAGE;
   int block_offset = (libraryId % BLOCKS_PER_PAGE) * BLOCK_SIZE;
   uint8_t name_len = BLOCK_SIZE - 1;
-  //dflash.Page_Read_Str(page_offset, block_offset, name_len, (uint8_t*)name);
-  //dflash.Page_Read_Str(page_offset, block_offset + name_len, 1, &elementAndType);
 
   return name;
 }
