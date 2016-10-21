@@ -43,7 +43,6 @@ void setup() {
   arduboy.println("Setup complete");
 }
 
-
 void loop() {
   unsigned long currentMillis = millis();
 
@@ -108,6 +107,7 @@ void loop() {
   int frLen = RawHID.availableFeatureReport();
   if (frLen) {
     arduboy.print("FR:");
+    arduboy.print(frLen);
     for (int i = 0; i < frLen; i++) {
       arduboy.print(featureReport[i], HEX);
     }

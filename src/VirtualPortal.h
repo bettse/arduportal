@@ -27,6 +27,7 @@ class VirtualPortal {
     int sequence;
     uint8_t lightVal;
     Token *characterToken;
+    bool characterLoaded;
 
     int activate(uint8_t* message, uint8_t* response);
     int color(uint8_t* message);

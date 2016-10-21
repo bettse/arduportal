@@ -1,6 +1,6 @@
 #include "VirtualPortal.h"
 
-VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL) {
+VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL), characterLoaded(false) {
 }
 
 int VirtualPortal::respondTo(uint8_t* message, uint8_t* response) {
@@ -101,15 +101,18 @@ int VirtualPortal::activate(uint8_t* message, uint8_t* response) {
 int VirtualPortal::status(uint8_t* response) {
   response[0] = 'S';
   response[1] = characterToken ? 0x01 : 0x00;
+  response[1] |= characterLoaded ? 0x02 : 0x00;
   response[2] = 0;
   response[3] = 0;
   response[4] = 0;
   response[5] = sequence++ % 0xFF;
 
+  characterLoaded = false;
   return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
 }
 
 bool VirtualPortal::loadToken(Token *t) {
+  characterLoaded = true;
   characterToken = t;
   return true;
 }
