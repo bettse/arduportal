@@ -117,6 +117,7 @@ void loop() {
 
   // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
+  RawHID.flush();
 }
 
 inline int positive_modulo(int i, int n) {

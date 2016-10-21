@@ -1,6 +1,8 @@
 
 #include "Token.h"
 #include "kingpen.h"
+#include "Arduboy.h"
+extern Arduboy arduboy;
 
 Token::Token(int libraryId) : libraryId(libraryId), elementAndType(0x63) {
   strcpy(name, "Kingpen");

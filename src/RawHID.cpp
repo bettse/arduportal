@@ -22,14 +22,15 @@ THE SOFTWARE.
 */
 
 #include "RawHID.h"
+#include "Arduboy.h"
+extern Arduboy arduboy;
 
 static const uint8_t _hidReportDescriptorRawHID[] PROGMEM = {
   0x06, 0x00, 0xFF, 0x09, 0x01, 0xA1, 0x01, 0x19, 0x01, 0x29, 0x40, 0x15, 0x00, 0x26, 0xFF, 0x00, 0x75, 0x08, 0x95, 0x20, 0x81, 0x00, 0x19, 0x01, 0x29, 0x40, 0x91, 0x00, 0xC0
 };
 
-RawHID_::RawHID_(void) : PluggableUSBModule(2, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1), dataLength(0), dataAvailable(0), featureReport(NULL), featureLength(0) {
+RawHID_::RawHID_(void) : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1), dataLength(0), dataAvailable(0), featureReport(NULL), featureLength(0) {
   epType[0] = EP_TYPE_INTERRUPT_IN;
-  epType[1] = EP_TYPE_INTERRUPT_OUT;
   PluggableUSB().plug(this);
 }
 
@@ -74,6 +75,7 @@ bool RawHID_::setup(USBSetup &setup) {
 
   if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
     if (request == HID_GET_REPORT) {
+      arduboy.println("HID_GetReport");
       // TODO: HID_GetReport();
       return true;
     }
@@ -102,6 +104,7 @@ bool RawHID_::setup(USBSetup &setup) {
         // except the host tries to send more then 32k bytes.
         // We dont have that much ram anyways.
         if (length == featureLength) {
+          arduboy.println("HID_REPORT_TYPE_FEATURE");
           USB_RecvControl(featureReport, featureLength);
 
           // Block until data is read (make length negative)
@@ -114,6 +117,7 @@ bool RawHID_::setup(USBSetup &setup) {
       else if (setup.wValueH == HID_REPORT_TYPE_OUTPUT) {
         if (!dataAvailable && length <= dataLength) {
           // Write data to fit to the end (not the beginning) of the array
+          arduboy.println("HID_REPORT_TYPE_OUTPUT");
           USB_RecvControl(data + dataLength - length, length);
           dataAvailable = length;
           return true;
@@ -122,8 +126,9 @@ bool RawHID_::setup(USBSetup &setup) {
 
       // Input (set HID report)
       else if(setup.wValueH == HID_REPORT_TYPE_INPUT) {
-        if(length == sizeof(_keyReport)){
-          USB_RecvControl(&_keyReport, length);
+        if(length == sizeof(input)){
+          arduboy.println("HID_REPORT_TYPE_INPUT");
+          USB_RecvControl(&input, length);
           return true;
         }
       }

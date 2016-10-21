@@ -2,9 +2,6 @@
 #define Token_H
 
 #include "Arduino.h"
-#include "Arduboy.h"
-
-extern Arduboy arduboy;
 
 #define PRIMARY_BUFFER 1
 #define SECONDARY_BUFFER 2

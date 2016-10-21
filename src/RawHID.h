@@ -139,7 +139,7 @@ protected:
   int getDescriptor(USBSetup &setup);
   bool setup(USBSetup &setup);
 
-  uint8_t epType[2];
+  uint8_t epType[1];
   uint8_t protocol;
   uint8_t idle;
 
@@ -151,6 +151,6 @@ protected:
   uint8_t *featureReport;
   int featureLength;
 
-  uint8_t _keyReport[32];
+  uint8_t input[RAWHID_SIZE];
 };
 extern RawHID_ RawHID;

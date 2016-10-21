@@ -1,4 +1,6 @@
 #include "VirtualPortal.h"
+#include "Arduboy.h"
+extern Arduboy arduboy;
 
 VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL), characterLoaded(false) {
 }

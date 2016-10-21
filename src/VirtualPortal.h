@@ -3,8 +3,6 @@
 
 #include "Arduino.h"
 #include "Token.h"
-#include "Arduboy.h"
-extern Arduboy arduboy;
 
 #define BLE_ATTRIBUTE_MAX_VALUE_LENGTH 20
 #define LCD arduboy
