@@ -2,7 +2,8 @@
 #include "Token.h"
 #include "kingpen.h"
 
-Token::Token(int libraryId) : libraryId(libraryId) {
+Token::Token(int libraryId) : libraryId(libraryId), elementAndType(0x63) {
+  strcpy(name, "Kingpen");
 }
 
 int Token::read(int block, uint8_t* buffer) {
@@ -25,26 +26,13 @@ void Token::readFlash(int block, uint8_t* buffer) {
   int chapter = TOC_SIZE + (libraryId * CHAPTER_SIZE);
   int page_offset = block / BLOCKS_PER_PAGE; //Which page in chapter [0,3]
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
+  //memcpy(buffer, tokens_masterkingpen_bin + BLOCK_SIZE * block, BLOCK_SIZE);
 }
 
 void Token::writeFlash(int block, uint8_t* buffer) {
   int chapter = TOC_SIZE + (libraryId * CHAPTER_SIZE);
   int page_offset = block / BLOCKS_PER_PAGE; //Which page in chapter [0,3]
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
-  uint8_t dflash_buffer = 0;
-
-  switch(type()) {
-    case TRAP_MASTER:
-    case MINI:
-    case REGULAR:
-      dflash_buffer = PRIMARY_BUFFER;
-      break;
-    case TRAP:
-      dflash_buffer = SECONDARY_BUFFER;
-      break;
-    default:
-      return;
-  }
 
 }
 
@@ -126,6 +114,9 @@ void Token::display() {
 uint8_t Token::type() {
   return (elementAndType & TYPE_MASK);
 }
+uint8_t Token::element() {
+  return (elementAndType & ELEMENT_MASK);
+}
 
 uint16_t Token::typeId() {
   uint8_t buffer[BLOCK_SIZE];
@@ -141,7 +132,5 @@ char* Token::getName() {
   return name;
 }
 
-uint8_t Token::element() {
-  return (elementAndType & ELEMENT_MASK);
-}
+
 
