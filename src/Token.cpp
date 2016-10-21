@@ -1,5 +1,6 @@
 
 #include "Token.h"
+#include "kingpen.h"
 
 Token::Token(int libraryId) : libraryId(libraryId) {
 }
