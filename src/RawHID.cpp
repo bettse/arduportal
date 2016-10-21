@@ -29,18 +29,29 @@ static const uint8_t _hidReportDescriptorRawHID[] PROGMEM = {
   0x06, 0x00, 0xFF, 0x09, 0x01, 0xA1, 0x01, 0x19, 0x01, 0x29, 0x40, 0x15, 0x00, 0x26, 0xFF, 0x00, 0x75, 0x08, 0x95, 0x20, 0x81, 0x00, 0x19, 0x01, 0x29, 0x40, 0x91, 0x00, 0xC0
 };
 
-RawHID_::RawHID_(void) : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1), dataLength(0), dataAvailable(0), featureReport(NULL), featureLength(0) {
+typedef struct {
+  InterfaceDescriptor hid;
+  HIDDescDescriptor   desc;
+  EndpointDescriptor  in;
+  EndpointDescriptor  out;
+} HIDDescriptorbi;
+
+
+RawHID_::RawHID_(void) : PluggableUSBModule(2, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1), dataLength(0), dataAvailable(0), featureReport(NULL), featureLength(0) {
   epType[0] = EP_TYPE_INTERRUPT_IN;
+  epType[1] = EP_TYPE_INTERRUPT_OUT;
   PluggableUSB().plug(this);
 }
 
 int RawHID_::getInterface(uint8_t *interfaceCount) {
   // Maybe as optional device FastRawHID with different USAGE PAGE
   *interfaceCount += 1; // uses 1
-  HIDDescriptor hidInterface = {
-      D_INTERFACE(pluggedInterface, 1, USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_NONE, HID_PROTOCOL_NONE),
+  HIDDescriptorbi hidInterface = {
+      D_INTERFACE(pluggedInterface, sizeof(epType), USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_NONE, HID_PROTOCOL_NONE),
       D_HIDREPORT(sizeof(_hidReportDescriptorRawHID)),
-      D_ENDPOINT(USB_ENDPOINT_IN(pluggedEndpoint), USB_ENDPOINT_TYPE_INTERRUPT, RAWHID_SIZE, 0x01)};
+      D_ENDPOINT(USB_ENDPOINT_IN(pluggedEndpoint), USB_ENDPOINT_TYPE_INTERRUPT, RAWHID_SIZE, 0x01),
+      D_ENDPOINT(USB_ENDPOINT_OUT(pluggedEndpoint), USB_ENDPOINT_TYPE_INTERRUPT, RAWHID_SIZE, 0x01)
+  };
   return USB_SendControl(0, &hidInterface, sizeof(hidInterface));
 }
 
