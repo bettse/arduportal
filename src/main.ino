@@ -82,7 +82,8 @@ void loop() {
   if (arduboy.pressed(A_BUTTON)) {
     arduboy.clear();
     arduboy.setCursor(0, 0);
-
+    next = new Token(0);
+    arduboy.println(next->getName());
   } else if (arduboy.pressed(B_BUTTON)) {
     uint8_t response[HID_MAX_LENGTH] = {0};
     uint8_t len = vp.status(response);
@@ -97,9 +98,6 @@ void loop() {
   } else if (arduboy.pressed(UP_BUTTON)) {
     libraryId++;
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
-    next = new Token(libraryId);
-    arduboy.clear();
-    arduboy.setCursor(0, 0);
   } else if (arduboy.pressed(DOWN_BUTTON)) {
     libraryId--;
   } else if (arduboy.pressed(LEFT_BUTTON)) {
