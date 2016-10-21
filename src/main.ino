@@ -15,40 +15,37 @@
 #include "RawHID.h"
 #include "VirtualPortal.h"
 
-#define HID_MAX_LENGTH 64
+#define HID_MAX_LENGTH 32
 
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 uint8_t rawhidData[255];
+
+uint8_t featureReport[HID_MAX_LENGTH] = {0};
 
 VirtualPortal vp = VirtualPortal();
 long previousMillis = 0;
 long interval = 1000;
 
 
-// This function runs once in your game.
-// use it for anything that needs to be set only once in your game.
 void setup() {
   Serial.begin(115200);
   RawHID.begin(rawhidData, sizeof(rawhidData));
+  RawHID.setFeatureReport(featureReport, sizeof(featureReport));
 
   // initiate arduboy instance
   arduboy.beginNoLogo();
 
-  // here we set the framerate to 15, we do not need to run at
-  // default 60 and it saves us battery life
   arduboy.setFrameRate(15);
   vp.connect();
 }
 
 
-// our main game loop, this runs once every cycle/frame.
-// this is where our game logic goes.
 void loop() {
   unsigned long currentMillis = millis();
   // pause render until it's time for the next frame
-  if (!(arduboy.nextFrame()))
-    return;
+  //if (!(arduboy.nextFrame()))
+  //  return;
 
   auto bytesAvailable = RawHID.available();
   uint8_t incoming[HID_MAX_LENGTH] = {0};
@@ -59,7 +56,7 @@ void loop() {
       incoming[i] = RawHID.read();
       arduboy.print(incoming[i], HEX);
     }
-    arduboy.println("");
+    arduboy.println(".");
 
     uint8_t response[HID_MAX_LENGTH] = {0};
     uint8_t len = vp.respondTo(incoming, response);
@@ -68,7 +65,7 @@ void loop() {
       for (int i = 0; i < len; i++) {
         arduboy.print(response[i], HEX);
       }
-      arduboy.println("");
+      arduboy.println(".");
       RawHID.write(response, len);
     }
   }
@@ -77,8 +74,20 @@ void loop() {
     //arduboy.print(F("A"));
     arduboy.clear();
     arduboy.setCursor(0, 0);
+
+    uint8_t response[HID_MAX_LENGTH] = {0};
+    uint8_t len = vp.status(response);
+    if(len) {
+      arduboy.print("<=");
+      for (int i = 0; i < len; i++) {
+        arduboy.print(response[i], HEX);
+      }
+      arduboy.println(".");
+      RawHID.write(response, len);
+    }
+
   } else if (arduboy.pressed(B_BUTTON)) {
-    arduboy.print(F("B"));
+    //arduboy.print(F("B"));
   } else if (arduboy.pressed(UP_BUTTON)) {
     arduboy.print(F("U"));
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
@@ -94,16 +103,16 @@ void loop() {
 
   if(currentMillis - previousMillis > interval) {
     previousMillis = currentMillis;
-    uint8_t response[HID_MAX_LENGTH] = {0};
-    uint8_t len = vp.status(response);
-    if(len) {
-      arduboy.print("<=");
-      for (int i = 0; i < len; i++) {
-        arduboy.print(response[i], HEX);
-      }
-      arduboy.println("");
-      RawHID.write(response, len);
+  }
+
+  int frLen = RawHID.availableFeatureReport();
+  if (frLen) {
+    arduboy.print("FR:");
+    for (int i = 0; i < frLen; i++) {
+      arduboy.print(featureReport[i], HEX);
     }
+    arduboy.println(".");
+    RawHID.enableFeatureReport();
   }
 
 }
