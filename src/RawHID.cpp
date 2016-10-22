@@ -77,7 +77,14 @@ int RawHID_::getDescriptor(USBSetup &setup) {
 }
 
 bool RawHID_::setup(USBSetup &setup) {
+  //arduboy.println("RawHID::setup");
   if (pluggedInterface != setup.wIndex) {
+    /*
+    arduboy.print(pluggedInterface);
+    arduboy.print("!=");
+    arduboy.print(setup.wIndex);
+    arduboy.println("");
+    */
     return false;
   }
 
@@ -86,11 +93,12 @@ bool RawHID_::setup(USBSetup &setup) {
 
   if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
     if (request == HID_GET_REPORT) {
-      arduboy.println("HID_GetReport");
+      //arduboy.println("HID_GET_REPORT");
       // TODO: HID_GetReport();
       return true;
     }
     if (request == HID_GET_PROTOCOL) {
+      //arduboy.println("HID_GET_PROTOCOL");
       // TODO: Send8(protocol);
       return true;
     }
@@ -98,10 +106,12 @@ bool RawHID_::setup(USBSetup &setup) {
 
   if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
     if (request == HID_SET_PROTOCOL) {
+      //arduboy.println("HID_SET_PROTOCOL");
       protocol = setup.wValueL;
       return true;
     }
     if (request == HID_SET_IDLE) {
+      //arduboy.println("HID_SET_IDLE");
       idle = setup.wValueL;
       return true;
     }
@@ -115,7 +125,7 @@ bool RawHID_::setup(USBSetup &setup) {
         // except the host tries to send more then 32k bytes.
         // We dont have that much ram anyways.
         if (length == featureLength) {
-          arduboy.println("HID_REPORT_TYPE_FEATURE");
+          //arduboy.println("HID_REPORT_TYPE_FEATURE");
           USB_RecvControl(featureReport, featureLength);
 
           // Block until data is read (make length negative)
@@ -128,7 +138,7 @@ bool RawHID_::setup(USBSetup &setup) {
       else if (setup.wValueH == HID_REPORT_TYPE_OUTPUT) {
         if (!dataAvailable && length <= dataLength) {
           // Write data to fit to the end (not the beginning) of the array
-          arduboy.println("HID_REPORT_TYPE_OUTPUT");
+          //arduboy.println("HID_REPORT_TYPE_OUTPUT");
           USB_RecvControl(data + dataLength - length, length);
           dataAvailable = length;
           return true;
@@ -138,7 +148,7 @@ bool RawHID_::setup(USBSetup &setup) {
       // Input (set HID report)
       else if(setup.wValueH == HID_REPORT_TYPE_INPUT) {
         if(length == sizeof(input)){
-          arduboy.println("HID_REPORT_TYPE_INPUT");
+          //arduboy.println("HID_REPORT_TYPE_INPUT");
           USB_RecvControl(&input, length);
           return true;
         }
@@ -146,6 +156,7 @@ bool RawHID_::setup(USBSetup &setup) {
     }
   }
 
+  //arduboy.println("return false");
   return false;
 }
 
