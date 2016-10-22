@@ -2,7 +2,7 @@
 #include "Arduboy.h"
 extern Arduboy arduboy;
 
-VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL), characterLoaded(false) {
+VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL), characterLoaded(false), proactiveStatus(false) {
 }
 
 int VirtualPortal::respondTo(uint8_t* message, uint8_t* response) {
@@ -71,46 +71,29 @@ int VirtualPortal::reset(uint8_t* response) {
   response[0] = 'R';
   response[1] = 0x02;
   response[2] = 0x19;
-  response[3] = 0;
-  response[4] = 0;
-  response[5] = sequence++ % 0xFF;
-  response[6] = 0;
-  response[7] = 0xaa;
-  response[8] = 0xc2;
-  response[9] = 0x02;
-  response[10] = 0x19;
-
-  return 11;
+  return 3;
 }
 
 int VirtualPortal::activate(uint8_t* message, uint8_t* response) {
+  proactiveStatus = (message[1] == 1);
   response[0] = message[0];
   response[1] = message[1];
-  response[2] = 0x62;
-  response[3] = 0x02;
-  response[4] = 0x19;
-  response[5] = 0xaa;
-  response[6] = 0x01;
-  response[7] = 0x53;
-  response[8] = 0xbc;
-  response[9] = 0x58;
-  response[10] = 0xfc;
-  response[11] = 0x7d;
-  response[12] = 0xf4;
-  return 13;
+  response[2] = 0xFF;
+  response[3] = 0x77;
+  return 4;
 }
 
 int VirtualPortal::status(uint8_t* response) {
   response[0] = 'S';
-  response[1] = characterToken ? 0x01 : 0x00;
-  response[1] |= characterLoaded ? 0x02 : 0x00;
+  response[1] = (characterToken ? 0x01 : 0x00) | (characterLoaded ? 0x02 : 0x00);
   response[2] = 0;
   response[3] = 0;
   response[4] = 0;
   response[5] = sequence++ % 0xFF;
+  response[6] = 1;
 
   characterLoaded = false;
-  return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
+  return 7;
 }
 
 bool VirtualPortal::loadToken(Token *t) {
@@ -188,6 +171,10 @@ void VirtualPortal::connect() {
 }
 
 void VirtualPortal::disconnect() {
+}
+
+bool VirtualPortal::sendStatus() {
+  return proactiveStatus;
 }
 
 void VirtualPortal::subscribe() {

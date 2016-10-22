@@ -20,12 +20,14 @@ class VirtualPortal {
     void unsubscribe();
     bool removeType(uint8_t);
     int status(uint8_t* response);
+    bool sendStatus();
 
   private:
     int sequence;
     uint8_t lightVal;
     Token *characterToken;
     bool characterLoaded;
+    bool proactiveStatus;
 
     int activate(uint8_t* message, uint8_t* response);
     int color(uint8_t* message);
