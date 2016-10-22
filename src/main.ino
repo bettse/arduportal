@@ -31,7 +31,6 @@ Token *next = NULL;
 unsigned int token_count = 1;
 
 void setup() {
-  Serial.begin(115200);
   RawHID.begin(rawhidData, sizeof(rawhidData));
   RawHID.setFeatureReport(featureReport, sizeof(featureReport));
 
@@ -39,8 +38,8 @@ void setup() {
   arduboy.beginNoLogo();
 
   arduboy.setFrameRate(15);
+  arduboy.setTextWrap(true);
   vp.connect();
-  arduboy.println("Setup complete");
 }
 
 void loop() {
@@ -59,65 +58,46 @@ void loop() {
   uint8_t incoming[HID_MAX_LENGTH] = {0};
   if (bytesAvailable) {
     arduboy.print("=>");
-
     for (int i = 0; i < bytesAvailable; i++) {
       incoming[i] = RawHID.read();
-      arduboy.print(incoming[i], HEX);
     }
-    arduboy.println(".");
+    arduboy.write((char)incoming[0]);
+    printHex(bytesAvailable);
 
     uint8_t response[HID_MAX_LENGTH] = {0};
     uint8_t len = vp.respondTo(incoming, response);
     if(len) {
-      arduboy.print("<=");
-      for (int i = 0; i < len; i++) {
-        arduboy.print(response[i], HEX);
+      arduboy.write('/');
+      arduboy.write((char)response[0]);
+      for (int i = 1; i < 6; i++) {
+        printHex(response[i]);
       }
-      arduboy.println(".");
       RawHID.write(response, HID_MAX_LENGTH);
     }
+    arduboy.println(".");
   }
 
   if (arduboy.pressed(A_BUTTON)) {
     arduboy.clear();
     arduboy.setCursor(0, 0);
+  } else if (arduboy.pressed(B_BUTTON)) {
     next = new Token(0);
     arduboy.println(next->getName());
-  } else if (arduboy.pressed(B_BUTTON)) {
-    uint8_t response[HID_MAX_LENGTH] = {0};
-    uint8_t len = vp.status(response);
-    if(len) {
-      arduboy.print("<=");
-      for (int i = 0; i < len; i++) {
-        arduboy.print(response[i], HEX);
-      }
-      arduboy.println(".");
-      RawHID.write(response, HID_MAX_LENGTH);
-    }
   } else if (arduboy.pressed(UP_BUTTON)) {
-    libraryId++;
+    //libraryId++;
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
   } else if (arduboy.pressed(DOWN_BUTTON)) {
-    libraryId--;
+    //libraryId--;
   } else if (arduboy.pressed(LEFT_BUTTON)) {
-    arduboy.print(F("L"));
   }
   libraryId = positive_modulo(libraryId, token_count);
 
-  int frLen = RawHID.availableFeatureReport();
-  if (frLen) {
-    arduboy.print("FR:");
-    arduboy.print(frLen);
-    for (int i = 0; i < frLen; i++) {
-      arduboy.print(featureReport[i], HEX);
-    }
-    arduboy.println(".");
-    RawHID.enableFeatureReport();
-  }
-
-  // then we finaly we tell the arduboy to display what we just wrote to the display
   arduboy.display();
-  RawHID.flush();
+}
+void printHex(int num) {
+  char tmp[3];
+  sprintf(tmp, "%02x", num);
+  arduboy.print(tmp);
 }
 
 inline int positive_modulo(int i, int n) {
