@@ -52,6 +52,20 @@ void loop() {
       vp.loadToken(next);
       next = NULL;
     }
+
+    if (vp.sendStatus()) {
+      uint8_t response[HID_MAX_LENGTH] = {0};
+      uint8_t len = vp.status(response);
+      if(len) {
+        arduboy.print("->");
+        arduboy.write((char)response[0]);
+        for (int i = 1; i < len; i++) {
+          printHex(response[i]);
+        }
+        arduboy.println("");
+        RawHID.write(response, HID_MAX_LENGTH);
+      }
+    }
   }
 
   auto bytesAvailable = RawHID.available();
