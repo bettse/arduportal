@@ -95,8 +95,10 @@ void loop() {
     arduboy.clear();
     arduboy.setCursor(0, 0);
   } else if (arduboy.pressed(B_BUTTON)) {
-    next = new Token(0);
-    arduboy.println(next->getName());
+    if(next == NULL) {
+      next = new Token(0);
+      arduboy.println(next->getName());
+    }
   } else if (arduboy.pressed(UP_BUTTON)) {
     //libraryId++;
   } else if (arduboy.pressed(RIGHT_BUTTON)) {
