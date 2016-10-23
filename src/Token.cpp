@@ -27,6 +27,9 @@ void Token::readFlash(int block, uint8_t* buffer) {
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
   int start = block * BLOCK_SIZE;
   for(int i = 0; i < BLOCK_SIZE; i++) {
+    if (start+i > EEPROM.length()) {
+      break;
+    }
     buffer[i] = EEPROM.read(start+i);
   }
 }
