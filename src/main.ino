@@ -38,30 +38,6 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
 
-  if(currentMillis - previousMillis > interval) {
-    previousMillis = currentMillis;
-
-    if (next) {
-      vp.loadToken(next);
-      next = NULL;
-    }
-
-    if (vp.sendStatus()) {
-      uint8_t response[HID_MAX_LENGTH] = {0};
-      uint8_t len = vp.status(response);
-      if(len) {
-        arduboy.setCursor(0, LINE_OUTGOING);
-        arduboy.print("<-");
-        arduboy.write((char)response[0]);
-        for (int i = 1; i < len; i++) {
-          printHex(response[i]);
-        }
-        RawHID.write(response, HID_MAX_LENGTH);
-      }
-    }
-
-  }
-
   auto bytesAvailable = RawHID.available();
   uint8_t incoming[HID_MAX_LENGTH] = {0};
   if (bytesAvailable) {
@@ -102,6 +78,31 @@ void loop() {
   }
   libraryId = positive_modulo(libraryId, token_count);
 
+  if(currentMillis - previousMillis > interval) {
+    previousMillis = currentMillis;
+
+    if (next) {
+      vp.loadToken(next);
+      next = NULL;
+    }
+
+    //Only send proactive status update when we didn't respond to a message
+    if (bytesAvailable == 0 && vp.sendStatus()) {
+      uint8_t response[HID_MAX_LENGTH] = {0};
+      uint8_t len = vp.status(response);
+      if(len) {
+        arduboy.setCursor(0, LINE_OUTGOING);
+        arduboy.print("<-");
+        arduboy.write((char)response[0]);
+        for (int i = 1; i < len; i++) {
+          printHex(response[i]);
+        }
+        RawHID.write(response, HID_MAX_LENGTH);
+      }
+    }
+
+  }
+
   arduboy.display();
 }
 void printHex(int num) {
@@ -113,6 +114,3 @@ void printHex(int num) {
 inline int positive_modulo(int i, int n) {
   return (i % n + n) % n;
 }
-
-
-
