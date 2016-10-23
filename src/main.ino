@@ -10,6 +10,8 @@
 #define LINE_OUTGOING 1 * LINE_HEIGHT
 #define LINE_LOADS 2 * LINE_HEIGHT
 
+#define PREVIEW_BYTES 6
+
 // make an instance of arduboy used for many functions
 Arduboy arduboy;
 uint8_t rawhidData[HID_MAX_LENGTH];
@@ -41,13 +43,22 @@ void loop() {
   auto bytesAvailable = RawHID.available();
   uint8_t incoming[HID_MAX_LENGTH] = {0};
   if (bytesAvailable) {
-    arduboy.setCursor(0, LINE_INCOMING);
-    arduboy.print("=>");
     for (int i = 0; i < bytesAvailable; i++) {
       incoming[i] = RawHID.read();
     }
-    arduboy.write((char)incoming[0]);
-    printHex(bytesAvailable);
+    if (incoming[0] != 'J') {
+      arduboy.setCursor(0, LINE_INCOMING);
+      arduboy.print("=>");
+      arduboy.write((char)incoming[0]);
+      if (bytesAvailable < PREVIEW_BYTES) {
+        for (int i = 1; i < bytesAvailable; i++) {
+          printHex(incoming[i]);
+        }
+      } else {
+        printHex(bytesAvailable);
+        arduboy.print("bytes");
+      }
+    }
 
     uint8_t response[HID_MAX_LENGTH] = {0};
     uint8_t len = vp.respondTo(incoming, response);
@@ -55,7 +66,7 @@ void loop() {
       arduboy.setCursor(0, LINE_OUTGOING);
       arduboy.print("<=");
       arduboy.write((char)response[0]);
-      for (int i = 1; i < 6; i++) {
+      for (int i = 1; i < PREVIEW_BYTES; i++) {
         printHex(response[i]);
       }
       RawHID.write(response, HID_MAX_LENGTH);
