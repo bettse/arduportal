@@ -6,36 +6,26 @@ VirtualPortal::VirtualPortal() : lightVal(0), sequence(0), characterToken(NULL),
 }
 
 int VirtualPortal::respondTo(uint8_t* message, uint8_t* response) {
-  printCommand(true, message);
   switch(message[0]) {
     case 'A':
-      activate(message, response);
-      break;
+      return activate(message, response);
     case 'C': //Ring color R G B
       return 0; //No response
-      break;
     case 'J':
       return 0; //No response
-      break;
     case 'L': //Trap light
       light(message);
       return 0; //No response
-      break;
     case 'Q': //Query / read
-      query(message, response);
-      break;
+      return query(message, response);
     case 'R':
-      reset(response);
-      break;
+      return reset(response);
     case 'S': //Status
-      status(response);
-      break;
+      return status(response);
     case 'W': //Write
-      write(message, response);
-      break;
+      return write(message, response);
   }
-  printCommand(false, response);
-  return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
+  return 0;
 }
 
 int VirtualPortal::query(uint8_t* message, uint8_t* response) {
@@ -48,7 +38,7 @@ int VirtualPortal::query(uint8_t* message, uint8_t* response) {
   response[2] = block;
 
   characterToken->read(block, response+3);
-  return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
+  return 3 + BLOCK_SIZE;
 }
 
 int VirtualPortal::write(uint8_t* message, uint8_t* response) {
@@ -64,7 +54,7 @@ int VirtualPortal::write(uint8_t* message, uint8_t* response) {
   response[1] = index;
   response[2] = block;
 
-  return BLE_ATTRIBUTE_MAX_VALUE_LENGTH;
+  return 3;
 }
 
 int VirtualPortal::reset(uint8_t* response) {
@@ -106,6 +96,7 @@ bool VirtualPortal::removeType(uint8_t type) {
   if (characterToken) {
     delete characterToken;
     characterToken = NULL;
+    characterLoaded = true;
   }
   return true;
 }
@@ -117,54 +108,6 @@ int VirtualPortal::light(uint8_t* message) {
 
 uint8_t VirtualPortal::light() {
   return lightVal * 0x80;
-}
-
-void VirtualPortal::printCommand(bool incoming, const uint8_t* command) {
-  int interestingBytes = 0;
-
-  LCD.write(LCD_MOVE); //MoveTo
-  LCD.write(LCD_TOP + 0x0F); //top + Last character
-  LCD.write(command[0]);
-
-  switch(command[0]) {
-    case 'C':
-      //interestingBytes = 3;
-      break;
-    case 'L': //Trap light
-      //interestingBytes = 1;
-      break;
-    case 'R':
-      //interestingBytes = incoming ? 1 : 12;
-      break;
-    case 'A':
-      //interestingBytes = 1;
-      break;
-    case 'S':
-      //interestingBytes = incoming ? 0 : 5;
-      break;
-    case 'Q': //Query / read
-    case 'W': //Write
-      if (command[2] == 1) {
-        interestingBytes = incoming ? 2 : 18;
-      }
-      break;
-  }
-
-  if (interestingBytes > 0) {
-    Serial.print(incoming ? "<= " : "=> ");
-    Serial.print((char)command[0]);
-    Serial.print(F(" "));
-
-    for(int i = 0; i < interestingBytes; i++) {
-      Serial.print(command[i+1], HEX); //+1 to ignore ASCII first byte
-      Serial.print(F(" "));
-    }
-    if (incoming) {
-      Serial.print(F(" "));
-    } else {
-      Serial.println(F(" "));
-    }
-  }
 }
 
 void VirtualPortal::connect() {
