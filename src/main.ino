@@ -75,6 +75,7 @@ void loop() {
 
   if (arduboy.pressed(A_BUTTON)) {
     arduboy.clear();
+    vp.removeType(0);
   } else if (arduboy.pressed(B_BUTTON)) {
     if(next == NULL) {
       next = new Token(0);
