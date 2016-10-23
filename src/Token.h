@@ -2,19 +2,7 @@
 #define Token_H
 
 #include "Arduino.h"
-
-#define PRIMARY_BUFFER 1
-#define SECONDARY_BUFFER 2
-
-#define LCD arduboy
-#define LCD_MOVE 0xFE
-#define LCD_TOP 0x80
-#define LCD_BOTTOM 0xC0
-#define LCD_CLEAR 0x01
-
-#define BACKLIGHT_CMD 0x7C
-#define BACKLIGHT_BASE 0x80
-#define BACKLIGHT_LEVELS 30
+#include <EEPROM.h>
 
 #define BLOCK_SIZE 16
 #define BLOCK_COUNT 64
