@@ -34,7 +34,7 @@ int VirtualPortal::query(uint8_t* message, uint8_t* response) {
   int arrayIndex = index & 0x0f;
 
   response[0] = 'Q';
-  response[1] = index;
+  response[1] = 0x10 | index;
   response[2] = block;
 
   characterToken->read(block, response+3);
