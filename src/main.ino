@@ -9,6 +9,7 @@
 #define LINE_INCOMING 0 * LINE_HEIGHT
 #define LINE_OUTGOING 1 * LINE_HEIGHT
 #define LINE_LOADS 2 * LINE_HEIGHT
+#define LINE_STATUS 3 * LINE_HEIGHT
 
 #define PREVIEW_BYTES 6
 
@@ -103,7 +104,7 @@ void loop() {
       uint8_t response[HID_MAX_LENGTH] = {0};
       uint8_t len = vp.status(response);
       if(len) {
-        arduboy.setCursor(0, LINE_OUTGOING);
+        arduboy.setCursor(0, LINE_STATUS);
         arduboy.print("<-");
         arduboy.write((char)response[0]);
         for (int i = 1; i < len; i++) {
@@ -112,11 +113,11 @@ void loop() {
         RawHID.write(response, HID_MAX_LENGTH);
       }
     }
-
   }
 
   arduboy.display();
 }
+
 void printHex(int num) {
   char tmp[3];
   sprintf(tmp, "%02x", num);
