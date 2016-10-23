@@ -1,6 +1,5 @@
 
 #include "Token.h"
-#include "kingpen.h"
 #include "Arduboy.h"
 extern Arduboy arduboy;
 
@@ -28,14 +27,12 @@ void Token::readFlash(int block, uint8_t* buffer) {
   int chapter = TOC_SIZE + (libraryId * CHAPTER_SIZE);
   int page_offset = block / BLOCKS_PER_PAGE; //Which page in chapter [0,3]
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
-  //memcpy(buffer, tokens_masterkingpen_bin + BLOCK_SIZE * block, BLOCK_SIZE);
 }
 
 void Token::writeFlash(int block, uint8_t* buffer) {
   int chapter = TOC_SIZE + (libraryId * CHAPTER_SIZE);
   int page_offset = block / BLOCKS_PER_PAGE; //Which page in chapter [0,3]
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
-
 }
 
 void Token::display() {
