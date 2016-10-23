@@ -35,6 +35,11 @@ void Token::writeFlash(int block, uint8_t* buffer) {
   int chapter = TOC_SIZE + (libraryId * CHAPTER_SIZE);
   int page_offset = block / BLOCKS_PER_PAGE; //Which page in chapter [0,3]
   int block_offset = (block % BLOCKS_PER_PAGE) * BLOCK_SIZE;
+  int start = block * BLOCK_SIZE;
+  for(int i = 0; i < BLOCK_SIZE; i++) {
+    EEPROM.update(start+i, buffer[i]);
+  }
+
 }
 
 void Token::display() {
